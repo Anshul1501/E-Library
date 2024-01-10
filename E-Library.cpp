@@ -8,8 +8,8 @@
 #include<string>
 #include<cstring>
 #include "/usr/local/mysql/include/mysql.h"
-
 using namespace std;
+
 // ANSI color codes for text color
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
@@ -40,6 +40,7 @@ class user{
         MYSQL *conn;
         conn = mysql_init(0);
         conn = mysql_real_connect(conn, "localhost", "root", "", "library", 0, NULL, 0);
+        
         if(conn){
             cout<<"connected";
         }
@@ -67,6 +68,48 @@ class user{
         }
         users++;
     }
+
+//admin only 
+void no_users(){
+
+    if(loggedin_user!="admin"){
+        cout<<"\t\t\t\t Not Authorized. Only admin can view all users details";
+        return;
+    }
+
+    cout<<"The users are: ";
+
+    MYSQL* conn;
+    MYSQL_ROW row;
+    MYSQL_RES* res; // Declare MYSQL_RES* for the result set
+
+    conn = mysql_init(0);
+    conn = mysql_real_connect(conn, "localhost", "root", "", "library", 0, NULL, 0);
+
+    if (conn) {
+        int qstate = mysql_query(conn, "SELECT username FROM users");
+
+        if (!qstate) {
+            res = mysql_store_result(conn);
+
+            if (res) {
+                int i = 1;
+                while ((row = mysql_fetch_row(res))) {
+                    cout<< i << ": " << row[0] ;
+                    i++;
+                }
+                mysql_free_result(res); // Free the result set
+            } else {
+                cout<< "Error retrieving results: " << mysql_error(conn) ;
+            }
+        } else {
+            cout<< "Error in query execution: " << mysql_error(conn) ;
+        }
+    } else {
+        cout<< "Connection is not established!" ;
+    }
+
+}
 };
 
 int main()
