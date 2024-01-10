@@ -2,15 +2,80 @@
 #include<fstream>
 #include<string.h>
 #include<time.h>
-using namespace std;
+#include<stdlib.h>
+#include<ctime>
+#include<sstream>
+#include<string>
+#include<cstring>
+#include "/usr/local/mysql/include/mysql.h"
 
-/* 
-    List of Opeations:   Admin Login, user name and password, Add Books, add book, delete book, update book, 
-                         list of books & delte the book in file, fine charges after certain time 
-*/
+using namespace std;
+// ANSI color codes for text color
+#define ANSI_COLOR_RED     "\x1b[31m"
+#define ANSI_COLOR_GREEN   "\x1b[32m"
+#define ANSI_COLOR_YELLOW  "\x1b[33m"
+#define ANSI_COLOR_BLUE    "\x1b[34m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
+
+int users = 0;
+string loggedin_user = "";
+
+void showtime(){
+    time_t now = time(0);
+    char *date_time = ctime(&now);
+    cout<<"\t\t\t\t"<<date_time;
+    cout<<endl;
+}
+
+//User
+
+class user{
+    private:
+    string username;
+    string password;
+
+    public:
+    void adduser(){
+
+        MYSQL *conn;
+        conn = mysql_init(0);
+        conn = mysql_real_connect(conn, "localhost", "root", "", "library", 0, NULL, 0);
+        if(conn){
+            cout<<"connected";
+        }
+        else {
+            cout<<"not connected";
+        }
+        cout<<"Username: ";
+        cin>>username;
+
+        cout<<"Password: ";
+        cin>>password;
+
+        int qstate= 0;  // query state 
+        stringstream ss;
+        ss<<"INSERT INTO users(username, password) VALUES("<<username<<", "<<password<<")";
+        string query = ss.str();
+        const char* q = query.c_str();
+        qstate = mysql_query(conn, q);
+
+        if(qstate==0){
+            cout<<" \t\t\t\t Record inserted successfully";
+        }
+        else {
+            cout<<"Failed";
+        }
+        users++;
+    }
+};
 
 int main()
-{ 
+{
+
+        cout<<"############################################################################## \n";
+        cout<<"          **********      Welcome to E-Library     ************ \n";
+        cout<<"############################################################################## \n";
+
 
     return 0;
 }
