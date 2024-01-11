@@ -36,80 +36,73 @@ class user{
 
     public:
     void adduser(){
-
+ 
+       //intialize a MySQL connection using MySQL C API
         MYSQL *conn;
         conn = mysql_init(0);
         conn = mysql_real_connect(conn, "localhost", "root", "", "library", 0, NULL, 0);
-        
-        if(conn){
-            cout<<"connected";
-        }
-        else {
-            cout<<"not connected";
-        }
-        cout<<"Username: ";
-        cin>>username;
 
-        cout<<"Password: ";
-        cin>>password;
+        if (conn) {
+    cout << "Connected" << endl;
 
-        int qstate= 0;  // query state 
-        stringstream ss;
-        ss<<"INSERT INTO users(username, password) VALUES("<<username<<", "<<password<<")";
-        string query = ss.str();
-        const char* q = query.c_str();
-        qstate = mysql_query(conn, q);
+    string username, password;
 
-        if(qstate==0){
-            cout<<" \t\t\t\t Record inserted successfully";
-        }
-        else {
-            cout<<"Failed";
-        }
-        users++;
-    }
+    cout << "Username: ";
+    cin >> username;
 
-//admin only 
-void no_users(){
+    cout << "Password: ";
+    cin >> password;
 
-    if(loggedin_user!="admin"){
-        cout<<"\t\t\t\t Not Authorized. Only admin can view all users details";
+    // Use prepared statement to prevent SQL injection
+    string query = "INSERT INTO users(username, password) VALUES(?, ?)";
+    MYSQL_STMT *stmt = mysql_stmt_init(conn);
+
+    if (!stmt) {
+        cerr << "Failed to initialize statement" << endl;
+        mysql_close(conn);
         return;
     }
 
-    cout<<"The users are: ";
-
-    MYSQL* conn;
-    MYSQL_ROW row;
-    MYSQL_RES* res; // Declare MYSQL_RES* for the result set
-
-    conn = mysql_init(0);
-    conn = mysql_real_connect(conn, "localhost", "root", "", "library", 0, NULL, 0);
-
-    if (conn) {
-        int qstate = mysql_query(conn, "SELECT username FROM users");
-
-        if (!qstate) {
-            res = mysql_store_result(conn);
-
-            if (res) {
-                int i = 1;
-                while ((row = mysql_fetch_row(res))) {
-                    cout<< i << ": " << row[0] ;
-                    i++;
-                }
-                mysql_free_result(res); // Free the result set
-            } else {
-                cout<< "Error retrieving results: " << mysql_error(conn) ;
-            }
-        } else {
-            cout<< "Error in query execution: " << mysql_error(conn) ;
-        }
-    } else {
-        cout<< "Connection is not established!" ;
+    if (mysql_stmt_prepare(stmt, query.c_str(), query.length()) != 0) {
+        cerr << "Failed to prepare statement: " << mysql_error(conn) << endl;
+        mysql_stmt_close(stmt);
+        mysql_close(conn);
+        return;
     }
 
+    MYSQL_BIND bind[2];
+    memset(bind, 0, sizeof(bind));
+
+    bind[0].buffer_type = MYSQL_TYPE_STRING;
+    bind[0].buffer = (void*)username.c_str();
+    bind[0].buffer_length = username.length();
+
+    bind[1].buffer_type = MYSQL_TYPE_STRING;
+    bind[1].buffer = (void*)password.c_str();
+    bind[1].buffer_length = password.length();
+
+    if (mysql_stmt_bind_param(stmt, bind) != 0) {
+        cerr << "Failed to bind parameters: " << mysql_stmt_error(stmt) << endl;
+        mysql_stmt_close(stmt);
+        mysql_close(conn);
+        return;
+    }
+
+    if (mysql_stmt_execute(stmt) == 0) {
+        cout << "Record inserted successfully" << endl;
+    } else {
+        cerr << "Failed to execute query: " << mysql_stmt_error(stmt) << endl;
+    }
+
+    mysql_stmt_close(stmt);
+    mysql_close(conn);
+
+    users++;
+} else {
+    cout << "Not connected" << endl;
 }
+
+    }
 };
 
 int main()
