@@ -1,19 +1,27 @@
-Console Based Library Management System: 
+# E-Library Management System
 
-Operations:  allow users to perform operations such as adding books, removing books, displaying available books, managing users accounts, borrowing/returning books. 
+## Overview
 
-How to Utilise OPPS concepts in c++: 
+This E-Library Management System is a C++ application that allows users to manage a digital library. The system includes functionalities for adding users, adding books, issuing books, returning books, and viewing user details.
 
-Classes and objects: Define classes like `Books`, `Library`, `users` to represent real world entity. 
+## Technologies Used
 
-Inheritance and Polymorphism:  Implement inheritance where applicable. For instance you might have different type of books (eg. fiction, non-fiction) inheritance from a base `Book` class.
+### XAMPP: Used as the backend server for MySQL database.
+### MySQL C API: Integrated with the MySQL C API to interact with the MySQL database.
+### C++: The main programming language used for the application.
 
-Encapsulation:  Use access specifier (`public`, `private` and `protected`) to encapsulate data and method within classes
+## Getting Started
 
-4. Abstraction:  Hide complex implementation details from the user. For instance, you might have functions to borrow/return books without revealing the internal workings.
+### Install XAMPP: 
+Download and install [XAMPP] (https://www.apachefriends.org/index.html)
 
-5. Overloading and Operator Overloading:   Overload operators like +, -, etc., for relevant operations. Overload functions for various purposes within your classes.
+### MySQL Database Setup: 
+Create a MySQL database named "library" using phpMyAdmin or any MySQL client.
 
-6. File Handling: Implement file handling to store book information, user data, borrowing records, etc., persistently.
+### Update Library Path (Temporary Solution): 
+When compiling your C++ program, ensure that you link it with the MySQL connector library:
 
-7. Exception Handling: Implement exception handling to manage errors gracefully, such as when a book is already borrowed, an invalid input is provided, etc.
+```console 
+g++ -o E-Library E-Library.cpp -I/usr/local/mysql/include -L/usr/local/mysql/lib -lmysqlclient -lmysqlcppconn
+```
+Run the compiled executable:
